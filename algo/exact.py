@@ -16,13 +16,13 @@ import os, time
 
 rng=jax.random.PRNGKey(1234)
 
-def naive(Ls, th, eta=1.0):
+def naive(Ls, th, **hp):
     grad_L = jacobian(Ls)(th) # n x n x d
     grads = jp.einsum('iij->ij', grad_L)
-    step = eta * grads
-    return th - step.reshape(th.shape)
+    step = hp['eta'] * grads
+    return th - step.reshape(th.shape), Ls(th)
 
-def la(Ls, th, eta=1.0, alpha=1.0):
+def la(Ls, th, **hp):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.lax.stop_gradient(jp.einsum('ii...->i...', jax.jacrev(Ls)(th)))
@@ -30,11 +30,11 @@ def la(Ls, th, eta=1.0, alpha=1.0):
         return (prod - jp.einsum('ij,ij->i', xi, xi))
 
     xi = jp.einsum('iij->ij', grad_L)
-    grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
-    step = eta * grads
-    return th - step.reshape(th.shape)
+    grads = xi - hp['alpha'] * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
+    step = hp['eta'] * grads
+    return th - step.reshape(th.shape), Ls(th)
 
-def lola(Ls, th, eta=1.0, alpha=1.0):
+def lola(Ls, th, **hp):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.einsum('ii...->i...', jax.jacrev(Ls)(th))
@@ -42,11 +42,11 @@ def lola(Ls, th, eta=1.0, alpha=1.0):
         return (prod - jp.einsum('ij,ij->i', xi, xi))
 
     xi = jp.einsum('iij->ij', grad_L)
-    grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
-    step = eta * grads
-    return th - step.reshape(th.shape)
+    grads = xi - hp['alpha'] * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
+    step = hp['eta'] * grads
+    return th - step.reshape(th.shape), Ls(th)
 
-def symlola(Ls, th, eta=1.0, alpha=1.0):
+def symlola(Ls, th, **hp):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.einsum('ii...->i...', jax.jacrev(Ls)(th))
@@ -54,6 +54,6 @@ def symlola(Ls, th, eta=1.0, alpha=1.0):
         return prod
 
     xi = jp.einsum('iij->ij', grad_L)
-    grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
-    step = eta * grads
-    return th - step.reshape(th.shape)
+    grads = xi - hp['alpha'] * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
+    step = hp['eta'] * grads
+    return th - step.reshape(th.shape), Ls(th)
