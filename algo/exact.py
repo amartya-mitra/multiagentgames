@@ -16,14 +16,14 @@ import os, time
 
 rng=jax.random.PRNGKey(1234)
 
-def naive(Ls, th, eta):
+def naive(Ls, th, eta=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
     grads = jp.einsum('iij->ij', grad_L)
     step = eta * grads
     assert th.shape == step.shape
     return th - step
 
-def la(Ls, th, eta, alpha):
+def la(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.lax.stop_gradient(jp.einsum('ii...->i...', jax.jacrev(Ls)(th)))
@@ -36,7 +36,7 @@ def la(Ls, th, eta, alpha):
     assert th.shape == step.shape
     return th - step
 
-def lola(Ls, th, eta, alpha):
+def lola(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.einsum('ii...->i...', jax.jacrev(Ls)(th))
@@ -49,7 +49,7 @@ def lola(Ls, th, eta, alpha):
     assert th.shape == step.shape
     return th - step
 
-def symlola(Ls, th, eta, alpha):
+def symlola(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
     def fn1(th):
         xi = jp.einsum('ii...->i...', jax.jacrev(Ls)(th))
