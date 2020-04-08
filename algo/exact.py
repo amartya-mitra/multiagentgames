@@ -20,8 +20,7 @@ def naive(Ls, th, eta=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
     grads = jp.einsum('iij->ij', grad_L)
     step = eta * grads
-    assert th.shape == step.shape
-    return th - step
+    return th - step.reshape(th.shape)
 
 def la(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
@@ -33,8 +32,7 @@ def la(Ls, th, eta=1.0, alpha=1.0):
     xi = jp.einsum('iij->ij', grad_L)
     grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
     step = eta * grads
-    assert th.shape == step.shape
-    return th - step
+    return th - step.reshape(th.shape)
 
 def lola(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
@@ -46,8 +44,7 @@ def lola(Ls, th, eta=1.0, alpha=1.0):
     xi = jp.einsum('iij->ij', grad_L)
     grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
     step = eta * grads
-    assert th.shape == step.shape
-    return th - step
+    return th - step.reshape(th.shape)
 
 def symlola(Ls, th, eta=1.0, alpha=1.0):
     grad_L = jacobian(Ls)(th) # n x n x d
@@ -59,5 +56,4 @@ def symlola(Ls, th, eta=1.0, alpha=1.0):
     xi = jp.einsum('iij->ij', grad_L)
     grads = xi - alpha * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
     step = eta * grads
-    assert th.shape == step.shape
-    return th - step
+    return th - step.reshape(th.shape)
