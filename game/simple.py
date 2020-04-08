@@ -12,12 +12,7 @@ import numpy as np
 from jax.experimental import optimizers
 from jax.tree_util import tree_multimap  # Element-wise manipulation of collections of numpy arrays
 from jax.ops import index, index_add, index_update
-import matplotlib.pyplot as plt
-from scipy.io import loadmat
 import os, time
-import gym
-import torch
-from jax.ops import index, index_add, index_update
 
 def matching_pennies():
   dims = [1, 1]
