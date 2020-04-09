@@ -42,8 +42,8 @@ def main():
     plt.xlabel('Learning Step')
     plt.ylabel('Average Loss')
     plt.legend(algo_list, loc='upper left', frameon=True, framealpha=1)
-    plt.show()
     print('Jax time:', time.time()-t1)
+    plt.show()
 
 if __name__ == "__main__":
     main()

@@ -14,7 +14,7 @@ from jax.tree_util import tree_multimap  # Element-wise manipulation of collecti
 from jax.ops import index, index_add, index_update
 import os, time
 
-def matching_pennies():
+def imp():
   dims = [1, 1]
   payout_mat_1 = jp.array([[1,-1],[-1,1]])
   payout_mat_2 = -payout_mat_1
