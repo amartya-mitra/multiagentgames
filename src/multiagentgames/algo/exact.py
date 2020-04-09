@@ -1,7 +1,7 @@
 from jax import jacobian
 import jax
 import jax.numpy as jp
-from src.multiagentgames.lib import util
+from multiagentgames.lib import util
 
 rng=jax.random.PRNGKey(1234)
 
