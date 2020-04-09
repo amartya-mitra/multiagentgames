@@ -88,3 +88,15 @@ class Algorithms:
         grads = xi_0 + p * third_term
         step = hp['eta'] * grads
         return th - step.reshape(th.shape), Ls(th)
+
+    def sga(Ls, th, hp):
+        grad_L = jacobian(Ls)(th) # n x n x d
+        xi = jp.einsum('iij->ij', grad_L)
+        full_hessian = jax.hessian(Ls)(th)
+        full_hessian_transpose = jp.einsum('ij...->ji...',full_hessian)
+        hess_diff = full_hessian - full_hessian_transpose
+        second_term = -hp['lambda'] * jp.einsum('iim->im',jp.einsum('ijklm,jk->ilm', hess_diff, xi))
+        grads = xi + second_term
+        step = hp['eta'] * grads
+        return th - step.reshape(th.shape), Ls(th)
+
