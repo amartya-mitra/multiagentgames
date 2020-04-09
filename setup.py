@@ -25,12 +25,19 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src'),
     install_requires=[
-       'jax==0.1.57',
-       'jaxlib==0.1.37',
-       'matplotlib',
-       'numpy >= 1.10',
-       'scipy >= 1.0',
-       'scikit-learn'
+        'jax==0.1.57',
+        'jaxlib==0.1.37',
+        'matplotlib',
+        'numpy >= 1.10',
+        'scipy >= 1.0',
+        'scikit-learn',
+        'wandb',
+        'gym',
+        'progressbar',
+        'torch',
+        'argparse_deco',
+        'argparse',
+        'pandas'
     ], #external packages as dependencies
     license='MIT',
     url='https://github.com/anirbanl/multiagentgames',
