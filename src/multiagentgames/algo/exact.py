@@ -1,6 +1,7 @@
 from jax import jacobian
 import jax
 import jax.numpy as jp
+from jax.ops import index, index_add, index_update
 from multiagentgames.lib import util
 
 rng=jax.random.PRNGKey(1234)
@@ -22,6 +23,18 @@ class Algorithms:
 
         xi = jp.einsum('iij->ij', grad_L)
         grads = xi - hp['alpha'] * jp.einsum('ii...->i...', jax.jacrev(fn1)(th))
+        step = hp['eta'] * grads
+        return th - step.reshape(th.shape), Ls(th)
+
+    def lola0(Ls, th, hp):
+        grad_L = jacobian(Ls)(th)  # n x n x d
+        xi = jp.einsum('iij->ij', grad_L)
+        full_hessian = jax.hessian(Ls)(th)
+        diag_hessian = jp.einsum('iijkl->ijkl', full_hessian)
+        for i in range(th.shape[0]):
+            diag_hessian = index_update(diag_hessian, index[i,:,i,:], 0)
+        third_term = jp.einsum('iij->ij',jp.einsum('ijkl,mij->mkl',diag_hessian,grad_L))
+        grads = xi - hp['alpha'] * third_term
         step = hp['eta'] * grads
         return th - step.reshape(th.shape), Ls(th)
 
