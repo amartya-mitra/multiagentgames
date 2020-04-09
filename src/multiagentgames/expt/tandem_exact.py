@@ -19,9 +19,9 @@ def main():
 
     num_runs = 100
     num_epochs = 30
-    hp = {'eta': 0.1, 'alpha': 0.1}
+    hp = {'eta': 0.1, 'alpha': 0.1, 'a': 0.5, 'b': 0.5}
     std = 0.1
-    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'CO', 'EG', 'CGD', 'LSS'][0:5]
+    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'CO', 'EG', 'CGD', 'LSS'][0:6]
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
 
     t1 = time.time()
