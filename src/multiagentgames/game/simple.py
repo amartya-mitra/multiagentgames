@@ -54,8 +54,8 @@ def ipd(gamma=0.96):
 def tandem():
   dims = [1, 1]
   def Ls(th):
-    x, y = th
+    x, y = th[0], th[1]
     L_1 = (x+y)**2-2*x
     L_2 = (x+y)**2-2*y
-    return [L_1.reshape(-1)[0], L_2.reshape(-1)[0]]
+    return jp.array([L_1.reshape(-1)[0], L_2.reshape(-1)[0]])
   return dims, Ls
