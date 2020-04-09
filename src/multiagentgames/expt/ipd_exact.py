@@ -19,11 +19,11 @@ def main():
 
     gamma = 0.96
     dims, Ls = ipd(gamma)
-    num_runs = 50
+    num_runs = 100
     num_epochs = 200
-    hp = {'eta': 1.0, 'alpha': 1.0}
+    hp = {'eta': 1.0, 'alpha': 1.0, 'a': 0.5, 'b': 0.5}
     std = 1
-    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'CO', 'EG', 'CGD', 'LSS'][0:5]
+    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'CO', 'EG', 'CGD', 'LSS'][0:6]
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
 
     t1 = time.time()
