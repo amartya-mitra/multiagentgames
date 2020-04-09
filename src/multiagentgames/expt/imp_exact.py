@@ -13,16 +13,6 @@ def init_th(dims, std, rng):
     init=init[dims[i]:]
   return jp.array(th)
 
-def init_th(dims, std, rng):
-  th = []
-  init=random.normal(rng, shape=(jp.sum(jp.array(dims)),))
-  if std > 0:
-    init*=std
-  for i in range(len(dims)):
-    th.append(init[:dims[i]])
-    init=init[dims[i]:]
-  return jp.array(th)
-
 def main():
     rng = jax.random.PRNGKey(1234)
     dims, Ls = imp()
