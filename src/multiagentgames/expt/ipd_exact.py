@@ -23,7 +23,7 @@ def main():
     num_epochs = 200
     hp = {'eta': 1.0, 'alpha': 1.0, 'a': 0.5, 'b': 0.5, 'lambda':1.0}
     std = 1
-    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'CO', 'EG', 'CGD', 'LSS'][0:7]
+    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'PSGA', 'CO', 'EG', 'CGD', 'LSS'][0:8]
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
 
     t1 = time.time()
