@@ -61,3 +61,40 @@ class Optimizer:
             return state[0]
 
         return init_fn, update_fn, get_params_fn
+
+    def naive(hp):
+        def init_fn(th):
+            return th
+
+        def update_fn(i, Ls, state):
+            th = state
+
+            # th is parameter pairs (gen_params, disc_params)
+            theta1, theta2 = th
+            theta1_flat, theta1_tree = tree_flatten(theta1)
+            theta2_flat, theta2_tree = tree_flatten(theta2)
+
+            # Ls is pair of loss functions (g_loss, d_loss)
+            l1, l2 = Ls
+
+            # compute gradients
+            grad1, grad2 = jacobian(l1)(theta1), jacobian(l2)(theta2)
+            grad1_flat, grad1_tree = tree_flatten(grad1)
+            grad2_flat, grad2_tree = tree_flatten(grad2)
+            step1 = [hp['eta'] * g for g in grad1_flat]
+            step2 = [hp['eta'] * g for g in grad2_flat]
+
+            # update parameters
+            theta1_flat = [t - s for t, s in zip(theta1_flat, step1)]
+            theta2_flat = [t - s for t, s in zip(theta2_flat, step2)]
+
+            theta1 = tree_unflatten(theta1_tree, theta1_flat)
+            theta2 = tree_unflatten(theta2_tree, theta2_flat)
+
+            return (theta1, theta2)
+
+        def get_params_fn(state):
+            return state
+
+        return init_fn, update_fn, get_params_fn
+
