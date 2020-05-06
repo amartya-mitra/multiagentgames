@@ -21,7 +21,16 @@ def main():
     dims, Ls = ipd(gamma)
     num_runs = 100
     num_epochs = 200
-    hp = {'eta': 1.0, 'alpha': 1.0, 'a': 0.5, 'b': 0.5, 'lambda':1.0, 'gamma':1.0}
+    algo_hp = {
+        'naive': {'eta': 1.0},
+        'lola': {'eta': 1.0, 'alpha': 1.0},
+        'la': {'eta': 1.0, 'alpha': 1.0},
+        'sos': {'eta': 1.0, 'alpha': 1.0, 'a': 0.5, 'b': 0.1},
+        'co': {'eta': 1.0, 'gamma':50.0},
+        'sga': {'eta': 1.0, 'lambda':1.0},
+        'cgd': {'eta': 10.0}
+    }
+    hp = {}
     std = 1
     # algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'PSGA', 'CO', 'EG', 'CGD', 'LSS'][0:8]
     algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
@@ -32,8 +41,10 @@ def main():
     plt.figure(figsize=(15, 8))
     for algo in [s.lower() for s in algo_list]:
         losses_out = np.zeros((num_runs, num_epochs))
-        update_fn=jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)))
+        update_fn=jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)), static_argnums=1)
         th = theta
+        for k,v in algo_hp[algo].items():
+            hp[k] = v
         for k in range(num_epochs):
             th, losses = update_fn(th, hp)
             losses_out[:, k] = (1-gamma)*losses[:, 0]
