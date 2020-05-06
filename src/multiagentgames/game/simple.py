@@ -51,6 +51,63 @@ def ipd(gamma=0.96):
     return jp.array([L_1.reshape(-1)[0], L_2.reshape(-1)[0]])
   return dims, Ls
 
+
+def simplified_dixit(gamma=1, ps=0.0):
+  dims = [10, 10]
+  payout_mat_1 = jp.array([2, 3, 0, 2, 2, 0, 3, 2])
+  payout_mat_2 =  jp.array([2, 0, 3, 2, 2, 3, 0, 2])
+
+  # payout_mat_1 = jp.array([-2, 0, -3, -2, -2, -3, 0, -2])
+  # payout_mat_2 =  jp.array([-2, -3, 0, -2, -2, 0, -3, -2])
+  def Ls(th):
+    p_1_0_s0 = sigmoid(th[0][0:1]); p_1_0_s1 = sigmoid(th[0][1:2])
+    p_2_0_s0 = sigmoid(th[1][0:1]); p_2_0_s1 = sigmoid(th[1][1:2])
+    
+    p_s0 =  ps
+    p_s1 = (1-ps)
+
+    # (idx = 4**i + 2**j + k) p(s1=i,p1=j,p2=k) = (p(s1=i,p1=j,p2=k|s0=0)p(s0=0) + p(s1=i,p1=j,p2=k|s0=1)p(s0=1))
+    p = jp.stack([p_s0*(p_1_0_s0*p_2_0_s0*p_s0 +  p_1_0_s1*p_2_0_s1*p_s1),                # p(s1=0,p1=0,p2=0) 
+                  p_s0*(p_1_0_s0*(1-p_2_0_s0)*p_s0 + p_1_0_s1*(1-p_2_0_s1)*p_s1),         # p(s1=0,p1=0,p2=1)
+                  p_s0*((1-p_1_0_s0)*p_2_0_s0*p_s0 + (1-p_1_0_s1)*p_2_0_s1*p_s1),         # p(s1=0,p1=1,p2=0)
+                  p_s0*((1-p_1_0_s0)*(1-p_2_0_s0)*p_s0 + (1-p_1_0_s1)*(1-p_2_0_s1)*p_s1), # p(s1=0,p1=1,p2=1)
+                 
+                  p_s1*(p_1_0_s0*p_2_0_s0*p_s0 +  p_1_0_s1*p_2_0_s1*p_s1),                # p(s1=1,p1=0,p2=0)
+                  p_s1*(p_1_0_s0*(1-p_2_0_s0)*p_s0 + p_1_0_s1*(1-p_2_0_s1)*p_s1),         # p(s1=1,p1=0,p2=1)
+                  p_s1*((1-p_1_0_s0)*p_2_0_s0*p_s0 + (1-p_1_0_s1)*p_2_0_s1*p_s1),         # p(s1=1,p1=1,p2=0)
+                  p_s1*((1-p_1_0_s0)*(1-p_2_0_s0)*p_s0 + (1-p_1_0_s1)*(1-p_2_0_s1)*p_s1), # p(s1=1,p1=1,p2=1)
+                 ], 
+            axis=1)
+
+    # print('p',p,p.shape)
+    p_1 = jp.reshape(sigmoid(th[0][2:10]), (8, 1))
+    p_2 = jp.reshape(sigmoid(th[1][2:10]), (8, 1))
+    P = jp.stack([p_s0*p_1*p_2,             # p(s_{t+1}=0, p1_t=0, p2_t=0| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s0*p_1*(1-p_2),         # p(s_{t+1}=0, p1_t=0, p2_t=1| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s0*(1-p_1)*p_2,         # p(s_{t+1}=0, p1_t=1, p2_t=0| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s0*(1-p_1)*(1-p_2),     # p(s_{t+1}=0, p1_t=1, p2_t=1| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+
+                  p_s1*p_1*p_2,             # p(s_{t+1}=1, p1_t=0, p2_t=0| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s1*p_1*(1-p_2),         # p(s_{t+1}=1, p1_t=0, p2_t=1| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s1*(1-p_1)*p_2,         # p(s_{t+1}=1, p1_t=1, p2_t=0| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  p_s1*(1-p_1)*(1-p_2),     # p(s_{t+1}=1, p1_t=1, p2_t=1| s_{t}=i, p1_{t-1}=j, p2_{t-1}=k)
+                  ], axis=1).reshape((8,8))
+
+    # print('P',P,P.shape)
+    # print('inv', jsp.linalg.inv(jp.eye(4)-gamma*P), jsp.linalg.inv(jp.eye(4)-gamma*P).shape)
+    M = -jp.dot(p, jsp.linalg.inv(jp.eye(8)-gamma*P))
+
+    # print('M',M)
+    L_1 = jp.dot(M, jp.reshape(payout_mat_1, (8, 1)))
+    L_2 = jp.dot(M, jp.reshape(payout_mat_2, (8, 1)))
+
+    # print('L_1',L_1.reshape(-1)[0])
+    # print('L_2',L_2.reshape(-1)[0])
+        
+    return jp.array([L_1.reshape(-1)[0], L_2.reshape(-1)[0]])
+  return dims, Ls
+
+
 def tandem():
   dims = [1, 1]
   def Ls(th):
