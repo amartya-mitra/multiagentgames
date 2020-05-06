@@ -150,6 +150,16 @@ class Algorithms:
         step = hp['eta'] * grads
         return th - step.reshape(th.shape), Ls(th)
 
+    def co(Ls, th, hp):
+        grad_L = jacobian(Ls)(th) # n x n x d
+        xi = jp.einsum('iij->ij', grad_L)
+        full_hessian = jax.hessian(Ls)(th)
+        full_hessian_transpose = jp.einsum('ij...->ji...',full_hessian)
+        second_term = hp['gamma'] * jp.einsum('iim->im',jp.einsum('ijklm,jk->ilm', full_hessian_transpose, xi))
+        grads = xi + second_term
+        step = hp['eta'] * grads
+        return th - step.reshape(th.shape), Ls(th)
+
     def sga(Ls, th, hp):
         grad_L = jacobian(Ls)(th) # n x n x d
         xi = jp.einsum('iij->ij', grad_L)
