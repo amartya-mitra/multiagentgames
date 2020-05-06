@@ -1,5 +1,7 @@
 from multiagentgames.algo.exact import *
 from multiagentgames.game.simple import *
+import itertools
+import random as rnd
 
 '''Iterated Matching Pennies Game - Convergence Analysis'''
 
@@ -19,7 +21,15 @@ def main():
 
     num_runs = 100
     num_epochs = 500
-    hp = {'eta': 0.1, 'alpha': 10.0, 'a': 0.5, 'b': 0.5, 'lambda':1.0, 'gamma':1.0}
+    algo_hp = {
+        'naive': {'eta': 0.1},
+        'lola': {'eta': 0.05, 'alpha': 50.0},
+        'la': {'eta': 0.05, 'alpha': 100.0},
+        'sos': {'eta': 1.0, 'alpha': 10.0, 'a': 0.5, 'b': 0.7},
+        'co': {'eta': 50.0, 'gamma':0.5},
+        'sga': {'eta': 0.5, 'lambda':10.0},
+        'cgd': {'eta': 0.1}
+    }
     std = 1
 #    algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'PSGA', 'CO', 'EG', 'CGD', 'LSS'][0:8]
     algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
@@ -30,8 +40,9 @@ def main():
     plt.figure(figsize=(15, 8))
     for algo in [s.lower() for s in algo_list]:
         losses_out = np.zeros((num_runs, num_epochs))
-        update_fn = jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)))
+        update_fn = jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)), static_argnums=1)
         th = theta
+        hp = algo_hp[algo]
         for k in range(num_epochs):
             th, losses = update_fn(th, hp)
             losses_out[:, k] = losses[:,0]
