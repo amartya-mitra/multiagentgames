@@ -15,6 +15,15 @@ def init_th(dims, std, rng):
     init=init[dims[i]:]
   return jp.array(th)
 
+def scatterplot(probs, title):
+    plt.scatter(probs[:, 0], probs[:, 1], color='red')
+    plt.legend()
+    plt.title(title)
+    plt.xlabel("p(head)_agent 1")
+    plt.ylabel("p(head)_agent 2")
+    plt.show()
+
+
 def main():
     rng = jax.random.PRNGKey(1234)
     dims, Ls = imp()
@@ -35,9 +44,11 @@ def main():
     algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
 
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
+    prob_fn = jit(vmap(sigmoid))
 
     t1 = time.time()
     plt.figure(figsize=(15, 8))
+    probslist = []
     for algo in [s.lower() for s in algo_list]:
         losses_out = np.zeros((num_runs, num_epochs))
         update_fn = jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)), static_argnums=1)
@@ -47,6 +58,7 @@ def main():
             th, losses = update_fn(th, hp)
             losses_out[:, k] = losses[:,0]
 
+        probslist.append(prob_fn(th))
         new_loss = [np.linalg.norm(loss) for loss in jp.mean(losses_out, axis=0)]
         plt.plot(new_loss)
 
@@ -57,6 +69,8 @@ def main():
     plt.legend(algo_list, loc='best', frameon=True, framealpha=1, ncol=3)
     print('Jax time:', time.time() - t1)
     plt.show()
+    for p, a in zip(probslist, algo_list):
+        scatterplot(p, a)
 
 if __name__ == "__main__":
     main()
