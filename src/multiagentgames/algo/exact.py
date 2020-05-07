@@ -43,7 +43,6 @@ class Algorithms:
         return th - step.reshape(th.shape), Ls(th)
 
     def lola0(Ls, th, hp):
-        import pdb; pdb.set_trace()
         grad_L = jacobian(Ls)(th)  # n x n x d
 
         # xi = Trace(\grad_{\Theta}V(\Theta)) i.e., \grad_{\theta_i}(Vi(\Theta)
