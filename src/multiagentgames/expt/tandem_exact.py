@@ -1,5 +1,7 @@
 from multiagentgames.algo.exact import *
 from multiagentgames.game.simple import *
+import random as rnd
+import itertools
 
 '''Tandem Game - SOS vs LOLA'''
 
@@ -19,7 +21,16 @@ def main():
 
     num_runs = 100
     num_epochs = 30
-    hp = {'eta': 0.1, 'alpha': 0.1, 'a': 0.5, 'b': 0.5, 'lambda':1.0, 'gamma':1.0}
+    algo_hp = {
+        'naive': {'eta': 0.1},
+        'lola': {'eta': 0.1, 'alpha': 0.1},
+        'la': {'eta': 0.1, 'alpha': 0.1},
+        'sos': {'eta': 0.1, 'alpha': 0.1, 'a': 0.5, 'b': 0.5},
+        'co': {'eta': 0.0005, 'gamma':100.0},
+        'sga': {'eta': 0.1, 'lambda':100.0},
+        'cgd': {'eta': 0.5}
+    }
+    hp = {}
     std = 0.1
     # algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'PSGA', 'CO', 'EG', 'CGD', 'LSS'][0:9]
     algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
@@ -29,8 +40,10 @@ def main():
     t1 = time.time()
     for algo in [s.lower() for s in algo_list]:
         losses_out = np.zeros((num_runs, num_epochs))
-        update_fn = jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)))
+        update_fn = jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)), static_argnums=1)
         th = theta
+        for k,v in algo_hp[algo].items():
+            hp[k] = v
         for k in range(num_epochs):
             th, losses = update_fn(th, hp)
             losses_out[:, k] = losses[:,0]
