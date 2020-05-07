@@ -16,7 +16,7 @@ def init_th(dims, std, rng):
 
 def scatterplot(probs, title):
     colors = cm.rainbow(np.linspace(0, 1, probs.shape[-1]))
-    labels = ['s0', 'CC', 'CD', 'DC', 'DD']
+    labels = ['s0', 's1', '000', '001', '010', '011', '100', '101', '110', '111']
     for i, (l, c) in enumerate(zip(labels, colors)):
         plt.scatter(probs[:, 0, i], probs[:, 1, i], color=c, label=l)
     plt.legend()
