@@ -52,7 +52,7 @@ def ipd(gamma=0.96):
   return dims, Ls
 
 
-def simplified_dixit(gamma=1, ps=0.0):
+def simplified_dixit(gamma=1, ps=0.5):
   dims = [10, 10]
   payout_mat_1 = jp.array([2, 3, 0, 2, 2, 0, 3, 2])
   payout_mat_2 =  jp.array([2, 0, 3, 2, 2, 3, 0, 2])

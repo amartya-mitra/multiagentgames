@@ -21,8 +21,8 @@ def scatterplot(probs, title):
         plt.scatter(probs[:, 0, i], probs[:, 1, i], color=c, label=l)
     plt.legend()
     plt.title(title)
-    plt.xlabel("p(C | state)_agent 1")
-    plt.ylabel("p(C | state)_agent 2")
+    plt.xlabel("p(0 | state)_agent 1")
+    plt.ylabel("p(1 | state)_agent 2")
     plt.show()
 
 def main():
@@ -33,13 +33,13 @@ def main():
     num_runs = 100
     num_epochs = 200
     algo_hp = {
-        'naive': {'eta': 100.0},
-        'lola': {'eta': 100, 'alpha': 0.0001},
-        'la': {'eta': 100, 'alpha':  0.00001},
-        'sos': {'eta': 100, 'alpha': 0.0005, 'a': 0.2, 'b': 0.8},
-        'co': {'eta': 100, 'gamma':0.01},
-        'sga': {'eta': 100, 'lambda':0.0001},
-        'cgd': {'eta': 1.0}
+        'naive': {'eta': 1.0},
+        'lola': {'eta': 1, 'alpha': 0.1},
+        'la': {'eta': 1.0, 'alpha':  0.01},
+        'sos': {'eta': 1, 'alpha': 0.1, 'a': 0.1, 'b': 0.8},
+        'co': {'eta': 1.0, 'gamma':0.01},
+        'sga': {'eta': 1.0, 'lambda':0.1},
+        'cgd': {'eta': 10.0}
     }
     hp = {}
     std = 1
