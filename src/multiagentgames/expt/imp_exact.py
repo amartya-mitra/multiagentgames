@@ -17,8 +17,9 @@ def init_th(dims, std, rng):
 
 def scatterplot(probs, title):
     plt.scatter(probs[:, 0], probs[:, 1], color='red')
-    plt.legend()
     plt.title(title)
+    plt.ylim(-0.05, 1.05)
+    plt.xlim(-0.05, 1.05)
     plt.xlabel("p(head)_agent 1")
     plt.ylabel("p(head)_agent 2")
     plt.show()
