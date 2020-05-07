@@ -1,6 +1,6 @@
 from multiagentgames.algo.exact import *
 from multiagentgames.game.simple import *
-
+import matplotlib.cm as cm
 
 '''Iterated Prisoner's Dilemma - SOS/LOLA vs LA/CO/SGA/EG/CGD/LSS/NAIVE'''
 
@@ -13,6 +13,17 @@ def init_th(dims, std, rng):
     th.append(init[:dims[i]])
     init=init[dims[i]:]
   return jp.array(th)
+
+def scatterplot(probs, title):
+    colors = cm.rainbow(np.linspace(0, 1, probs.shape[-1]))
+    labels = ['s0', 'CC', 'CD', 'DC', 'DD']
+    for i, (l, c) in enumerate(zip(labels, colors)):
+        plt.scatter(probs[:, 0, i], probs[:, 1, i], color=c, label=l)
+    plt.legend()
+    plt.title(title)
+    plt.xlabel("p(C | state)_agent 1")
+    plt.ylabel("p(C | state)_agent 2")
+    plt.show()
 
 def main():
     rng = jax.random.PRNGKey(1234)
@@ -36,9 +47,11 @@ def main():
     algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
 
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
+    prob_fn = jit(vmap(sigmoid))
 
     t1 = time.time()
     plt.figure(figsize=(15, 8))
+    probslist = []
     for algo in [s.lower() for s in algo_list]:
         losses_out = np.zeros((num_runs, num_epochs))
         update_fn=jit(vmap(partial(Algorithms[algo], Ls), in_axes=(0, None), out_axes=(0, 0)), static_argnums=1)
@@ -48,6 +61,7 @@ def main():
         for k in range(num_epochs):
             th, losses = update_fn(th, hp)
             losses_out[:, k] = (1-gamma)*losses[:, 0]
+        probslist.append(prob_fn(th))
         mean = np.mean(losses_out, axis=0)
         dev = np.std(losses_out, axis=0)
         plt.plot(np.arange(num_epochs), mean)
@@ -59,6 +73,9 @@ def main():
     plt.legend(algo_list, loc='upper left', frameon=True, framealpha=1, ncol=3)
     print('Jax time:', time.time()-t1)
     plt.show()
+    for p, a in zip(probslist, algo_list):
+        scatterplot(p, a)
+
 
 if __name__ == "__main__":
     main()
