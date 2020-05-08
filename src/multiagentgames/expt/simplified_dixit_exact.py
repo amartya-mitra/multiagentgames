@@ -75,7 +75,7 @@ def main():
         plt.plot(np.arange(num_epochs), mean)
         plt.fill_between(np.arange(num_epochs), mean-dev, mean+dev, alpha=0.08)
 
-    plt.title('IPD Results')
+    plt.title('Dixit Results')
     plt.xlabel('Learning Step')
     plt.ylabel('Average Loss')
     plt.legend(algo_list, loc='upper left', frameon=True, framealpha=1, ncol=3)
