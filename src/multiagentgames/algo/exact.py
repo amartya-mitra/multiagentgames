@@ -228,15 +228,15 @@ class Algorithms:
         # This term is the competitve term.
         # [\sum_{j \ne i} \grad_{\theta_i}(\grad_{\theta_j}(Vi(\Theta)) * \grad_{\theta_j} Vj(\Theta) ]
         # Shape: (n,d)
-        competitive_term = jp.einsum('ik, ikjl -> jl', xi, diag_hessian)
+        competitive_term = jp.einsum('ikjl, jl-> ik', diag_hessian, xi)
 
-        lola_adjoint_term = xi - hp['eta'] * competitive_term
+        lola_adjoint_term = xi - competitive_term
 
         n, dim = th.shape
         Id = jp.stack([jp.eye(dim)]*n, axis=0)
         # This is the equilibrium term from CGD paper. 
         # (Id_{dXd) + \eta^{2} * \grad_{\theta_i}(\grad_{\theta_j}(Vi(\Theta)) * \grad_{\theta_j}(\grad_{\theta_i}(Vj(\Theta)))^{-1}
-        equilibrium_term = jp.linalg.inv(Id - jp.einsum('ikjl,jlmn->ikn', diag_hessian, diag_hessian))
+        equilibrium_term = jp.linalg.inv(Id - jp.einsum('ikjl,injl->ikn', diag_hessian, diag_hessian))
 
         grads = jp.einsum('ikl,il -> ik', equilibrium_term, lola_adjoint_term)
         step = hp['eta'] * grads
