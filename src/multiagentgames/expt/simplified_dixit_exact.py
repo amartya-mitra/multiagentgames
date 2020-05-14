@@ -1,6 +1,7 @@
 from multiagentgames.algo.exact import *
 from multiagentgames.game.simple import *
 import matplotlib.cm as cm
+import random as rnd
 
 '''Iterated Simplified Dixit - SOS/LOLA vs LA/CO/SGA/EG/CGD/LSS/NAIVE'''
 
@@ -39,7 +40,7 @@ def main():
         'sos': {'eta': 1, 'alpha': 0.1, 'a': 0.1, 'b': 0.8},
         'co': {'eta': 1.0, 'gamma':0.01},
         'sga': {'eta': 1.0, 'lambda':0.1},
-        'cgd': {'eta': 10.0}
+        'cgd': {'eta': 0.1}
     }
     hp = {}
     std = 1
@@ -83,7 +84,6 @@ def main():
     plt.show()
     for p, a in zip(probslist, algo_list):
         scatterplot(p, a)
-
 
 if __name__ == "__main__":
     main()
