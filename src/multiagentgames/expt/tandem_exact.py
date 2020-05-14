@@ -28,7 +28,7 @@ def main():
         'sos': {'eta': 0.1, 'alpha': 0.1, 'a': 0.5, 'b': 0.5},
         'co': {'eta': 0.0005, 'gamma':100.0},
         'sga': {'eta': 0.1, 'lambda':100.0},
-        'cgd': {'eta': 0.5}
+        'cgd': {'eta': 1.0}
     }
     hp = {}
     std = 0.1
