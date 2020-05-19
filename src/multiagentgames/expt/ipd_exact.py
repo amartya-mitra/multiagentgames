@@ -39,12 +39,13 @@ def main():
         'sos': {'eta': 1.0, 'alpha': 1.0, 'a': 0.5, 'b': 0.1},
         'co': {'eta': 1.0, 'gamma':50.0},
         'sga': {'eta': 1.0, 'lambda':1.0},
-        'cgd': {'eta': 10.0}
+        'cgd': {'eta': 1.0},
+        'lolacgd': {'eta': 0.5}
     }
     hp = {}
     std = 1
     # algo_list = ['NAIVE', 'LOLA0', 'LOLA', 'LA', 'SYMLOLA', 'SOS', 'SGA', 'PSGA', 'CO', 'EG', 'CGD', 'LSS'][0:8]
-    algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD']
+    algo_list = ['NAIVE', 'LOLA', 'LA', 'SOS', 'CO', 'SGA', 'CGD', 'LOLACGD']
 
     theta = vmap(partial(init_th, dims, std))(jax.random.split(rng, num_runs))
     prob_fn = jit(vmap(sigmoid))
@@ -59,6 +60,9 @@ def main():
         for k,v in algo_hp[algo].items():
             hp[k] = v
         for k in range(num_epochs):
+            # th, losses, eig = update_fn(th, hp)
+            # eig = jp.abs(eig)
+            # print(jp.min(eig), jp.max(eig))
             th, losses = update_fn(th, hp)
             losses_out[:, k] = (1-gamma)*losses[:, 0]
         probslist.append(prob_fn(th))
@@ -75,7 +79,6 @@ def main():
     plt.show()
     for p, a in zip(probslist, algo_list):
         scatterplot(p, a)
-
 
 if __name__ == "__main__":
     main()
