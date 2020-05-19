@@ -236,8 +236,31 @@ class Algorithms:
         Id = jp.stack([jp.eye(dim)]*n, axis=0)
         # This is the equilibrium term from CGD paper. 
         # (Id_{dXd) + \eta^{2} * \grad_{\theta_i}(\grad_{\theta_j}(Vi(\Theta)) * \grad_{\theta_j}(\grad_{\theta_i}(Vj(\Theta)))^{-1}
-        equilibrium_term = jp.linalg.inv(Id - jp.einsum('ikjl,injl->ikn', diag_hessian, diag_hessian))
+        equilibrium_term = jp.linalg.inv(Id - jp.einsum('ikjl,jlin->ikn', diag_hessian, diag_hessian))
 
         grads = jp.einsum('ikl,il -> ik', equilibrium_term, lola_adjoint_term)
         step = hp['eta'] * grads
         return th - step.reshape(th.shape), Ls(th)
+
+    def lolacgd(Ls, th, hp):
+        grad_L = jacobian(Ls)(th) # n x n x d
+        xi = jp.einsum('iij->ij', grad_L)
+        full_hessian = hp['eta'] * jax.hessian(Ls)(th)
+
+        off_diag_hessian = full_hessian
+        for i in range(th.shape[0]):
+            off_diag_hessian = index_update(off_diag_hessian, index[i,i,:,:,:], 0)
+        la_term = jp.einsum('iim->im',jp.einsum('ijklm,jk->ilm', off_diag_hessian, xi))
+
+        diag_hessian = jp.einsum('iijkl->ijkl', full_hessian)
+        for i in range(th.shape[0]):
+            diag_hessian = index_update(diag_hessian, index[i,:,i,:], 0)
+        lola_term = jp.einsum('iij->ij',jp.einsum('ijkl,mij->mkl',diag_hessian,grad_L))
+
+        numerator = xi - la_term - lola_term
+        n, dim = th.shape
+        Id = jp.stack([jp.eye(dim)]*n, axis=0)
+        inverse = jp.linalg.inv(Id - 3 * jp.einsum('ikjl,jlin->ikn', diag_hessian, diag_hessian))
+        grads = jp.einsum('ikl,il -> ik', inverse, numerator)
+        step = hp['eta'] * grads
+        return th - step.reshape(th.shape), Ls(th)#, jp.linalg.eig(Id - 3 * jp.einsum('ikjl,jlin->ikn', diag_hessian, diag_hessian))[0]
