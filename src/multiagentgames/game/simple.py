@@ -51,6 +51,28 @@ def ipd(gamma=0.96):
     return jp.array([L_1.reshape(-1)[0], L_2.reshape(-1)[0]])
   return dims, Ls
 
+def ish(gamma=0.96):
+  dims = [5, 5]
+  payout_mat_1 = jp.array([[4,0],[3,1]])
+  payout_mat_2 = payout_mat_1.T
+  def Ls(th):
+    p_1_0 = sigmoid(th[0][0:1])
+    p_2_0 = sigmoid(th[1][0:1])
+    p = jp.stack([p_1_0*p_2_0, p_1_0*(1-p_2_0), (1-p_1_0)*p_2_0, (1-p_1_0)*(1-p_2_0)], axis=1)
+    # print('p',p,p.shape)
+    p_1 = jp.reshape(sigmoid(th[0][1:5]), (4, 1))
+    p_2 = jp.reshape(sigmoid(th[1][1:5]), (4, 1))
+    P = jp.stack([p_1*p_2, p_1*(1-p_2), (1-p_1)*p_2, (1-p_1)*(1-p_2)], axis=1).reshape((4,4))
+    # print('P',P,P.shape)
+    # print('inv', jsp.linalg.inv(jp.eye(4)-gamma*P), jsp.linalg.inv(jp.eye(4)-gamma*P).shape)
+    M = -jp.dot(p, jsp.linalg.inv(jp.eye(4)-gamma*P))
+    # print('M',M)
+    L_1 = jp.dot(M, jp.reshape(payout_mat_1, (4, 1)))
+    L_2 = jp.dot(M, jp.reshape(payout_mat_2, (4, 1)))
+    # print('L_1',L_1.reshape(-1)[0])
+    # print('L_2',L_2.reshape(-1)[0])
+    return jp.array([L_1.reshape(-1)[0], L_2.reshape(-1)[0]])
+  return dims, Ls
 
 def simplified_dixit(gamma=1, ps=0.5):
   dims = [10, 10]
